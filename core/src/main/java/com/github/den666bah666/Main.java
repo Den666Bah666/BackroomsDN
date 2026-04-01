@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.github.den666bah666.screens.GameScreen;
+import com.github.den666bah666.screens.MenuScreen;
 
 public class Main extends Game {
     public static final int MENU_STATE = 0;
@@ -14,10 +15,10 @@ public class Main extends Game {
 
     @Override
     public void create() {
-        AssetManager.load("player.png", "player", Texture.class);
+        Assets.loadAll();
 
         batch = new SpriteBatch();
-        switchState(GAME_STATE);
+        switchState(MENU_STATE);
     }
 
     @Override
@@ -29,12 +30,12 @@ public class Main extends Game {
     @Override
     public void dispose() {
         batch.dispose();
-        AssetManager.dispose();
+        Assets.dispose();
     }
 
     private void switchState(int state) {
         switch (state) {
-            case MENU_STATE -> IO.println("Пошёл нахуй");
+            case MENU_STATE -> setScreen(new MenuScreen(batch));
             case GAME_STATE -> setScreen(new GameScreen(batch));
         }
     }

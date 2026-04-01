@@ -1,0 +1,410 @@
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\Assets.java ===
+package com.github.den666bah666;
+
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+
+public class Assets {
+    public static final AssetManager manager = new AssetManager();
+
+    public static final String UI_ATLAS = "ui.atlas";
+    public static final String PLAYER_TEXTURE = "player.png";
+
+    public static void loadAll() {
+        manager.load(PLAYER_TEXTURE, Texture.class);
+        manager.load(UI_ATLAS, TextureAtlas.class);
+
+        manager.finishLoading();
+    }
+
+    public static Texture getTexture(String name) {
+        return manager.get(name, Texture.class);
+    }
+
+    public static TextureAtlas getAtlas(String name) {
+        return manager.get(name, TextureAtlas.class);
+    }
+
+    public static boolean isLoaded() {
+        return manager.update();
+    }
+
+    public static float getProgress() {
+        return manager.getProgress();
+    }
+
+    public static void dispose() {
+        manager.dispose();
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\drawables\TiledButtonDrawable.java ===
+package com.github.den666bah666.drawables;
+
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
+
+public class TiledButtonDrawable extends BaseDrawable {
+    private TextureRegion bgRegion;
+
+    public TiledButtonDrawable(TextureRegion bgRegion) {
+        this.bgRegion = bgRegion;
+    }
+
+    @Override
+    public void draw(Batch batch, float x, float y, float width, float height) {
+        int tileW = bgRegion.getRegionWidth();
+        int tileH = bgRegion.getRegionHeight();
+
+        for (float y_ = y; y_ < y + height; y_ += tileH) {
+            for (float x_ = x; x_ < x + width; x_ += tileW) {
+                batch.draw(bgRegion, x_, y_,
+                    Math.min(tileW, x + width - x_), Math.min(tileH, y + height - y_));
+            }
+        }
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\drawables\TiledNinePatchDrawable.java ===
+package com.github.den666bah666.drawables;
+
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+
+public class TiledNinePatchDrawable extends TiledButtonDrawable {
+    private NinePatchDrawable patchDrawable;
+
+    public TiledNinePatchDrawable(NinePatch patch, TextureRegion bgRegion) {
+        super(bgRegion);
+        patchDrawable = new NinePatchDrawable(patch);
+    }
+
+    @Override
+    public void draw(Batch batch, float x, float y, float width, float height) {
+        super.draw(batch, x, y, width, height);
+        patchDrawable.draw(batch, x, y, width, height);
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\Main.java ===
+package com.github.den666bah666;
+
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.github.den666bah666.screens.GameScreen;
+import com.github.den666bah666.screens.MenuScreen;
+
+public class Main extends Game {
+    public static final int MENU_STATE = 0;
+    public static final int GAME_STATE = 1;
+    public SpriteBatch batch;
+
+    @Override
+    public void create() {
+        Assets.loadAll();
+
+        batch = new SpriteBatch();
+        switchState(MENU_STATE);
+    }
+
+    @Override
+    public void render() {
+        ScreenUtils.clear(0, 0, 0, 1);
+        screen.render(Gdx.graphics.getDeltaTime());
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        Assets.dispose();
+    }
+
+    private void switchState(int state) {
+        switch (state) {
+            case MENU_STATE -> setScreen(new MenuScreen(batch));
+            case GAME_STATE -> setScreen(new GameScreen(batch));
+        }
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\models\Player.java ===
+package com.github.den666bah666.models;
+
+import com.badlogic.gdx.math.Vector2;
+
+public class Player {
+    private Vector2 position;
+    private Vector2 velocity;
+    private float speed;
+
+    public Player(float x, float y) {
+        position = new Vector2(x, y);
+        velocity = new Vector2(0, 0);
+        speed = 2;
+    }
+
+    public void update() {
+        position.add(velocity.nor().scl(speed));
+    }
+
+    public Vector2 getPosition() {
+        return position;
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\screens\GameScreen.java ===
+package com.github.den666bah666.screens;
+
+import com.badlogic.gdx.*;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.github.den666bah666.Assets;
+import com.github.den666bah666.models.Player;
+import com.github.den666bah666.views.PlayerView;
+
+public class GameScreen implements Screen {
+    private Viewport viewport;
+    private Camera camera;
+    private SpriteBatch batch;
+    private Player player;
+    private PlayerView playerView;
+
+    private InputProcessor inputProcessor;
+
+    public GameScreen(SpriteBatch batch) {
+        inputProcessor = new InputAdapter() {
+            private static final int MASK_LT = 0x8;
+            private static final int MASK_BD = 0x4;
+            private static final int MASK_FD = 0x2;
+            private static final int MASK_RT = 0x1;
+
+            private int mask;
+
+            @Override
+            public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.A) {
+                    mask |= MASK_LT;
+                } else if (keycode == Input.Keys.S) {
+                    mask |= MASK_BD;
+                } else if (keycode == Input.Keys.W) {
+                    mask |= MASK_FD;
+                } else if (keycode == Input.Keys.D) {
+                    mask |= MASK_RT;
+                } else {
+                    return false;
+                }
+
+                player.getVelocity().set(
+                    (mask & 0x1) - (mask >> 3),
+                    ((mask >> 1) & 0x1) - ((mask >> 2) & 0x1)
+                );
+
+                return true;
+            }
+
+            @Override
+            public boolean keyUp(int keycode) {
+                if (keycode == Input.Keys.A) {
+                    mask &= MASK_LT ^ 0xF;
+                } else if (keycode == Input.Keys.S) {
+                    mask &= MASK_BD ^ 0xF;
+                } else if (keycode == Input.Keys.W) {
+                    mask &= MASK_FD ^ 0xF;
+                } else if (keycode == Input.Keys.D) {
+                    mask &= MASK_RT ^ 0xF;
+                } else {
+                    return false;
+                }
+
+                player.getVelocity().set(
+                    (mask & 0x1) - (mask >> 3),
+                    ((mask >> 1) & 0x1) - ((mask >> 2) & 0x1)
+                );
+
+                return true;
+            }
+        };
+
+        Gdx.input.setInputProcessor(inputProcessor);
+
+        this.batch = batch;
+        camera = new OrthographicCamera();
+        viewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        player = new Player(0, 0);
+        playerView = new PlayerView(Assets.getTexture(Assets.PLAYER_TEXTURE));
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+    @Override
+    public void render(float delta) {
+        player.update();
+
+        viewport.apply();
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        playerView.render(batch, player);
+        batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+        dispose();
+    }
+
+    @Override
+    public void dispose() {
+
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\screens\MenuScreen.java ===
+package com.github.den666bah666.screens;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.github.den666bah666.Assets;
+import com.github.den666bah666.drawables.TiledButtonDrawable;
+import com.github.den666bah666.drawables.TiledNinePatchDrawable;
+
+public class MenuScreen implements Screen {
+    private Viewport viewport;
+    private Camera camera;
+    private SpriteBatch batch;
+    private Stage stage;
+
+    public MenuScreen(SpriteBatch batch) {
+        this.batch = batch;
+        stage = new Stage(new ScreenViewport());
+
+        TextureAtlas atlas = Assets.getAtlas(Assets.UI_ATLAS);
+
+        Gdx.input.setInputProcessor(stage);
+
+        BitmapFont font = new BitmapFont();
+        font.setColor(Color.WHITE);
+        font.getData().setScale(1.5f);
+
+        TiledNinePatchDrawable tiledNinePatchDrawable = new TiledNinePatchDrawable(
+            atlas.createPatch("button_frame"), atlas.findRegion("button_frame")
+        );
+
+        // Generic style
+        TextButton.TextButtonStyle genericStyle = new TextButton.TextButtonStyle();
+        genericStyle.fontColor = Color.WHITE;
+        genericStyle.up = tiledNinePatchDrawable;
+        genericStyle.font = font;
+
+        // Menu button
+        TextButton menuButton = new TextButton("Menu", genericStyle);
+        stage.addActor(menuButton);
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+    @Override
+    public void render(float delta) {
+        stage.act(delta);
+        stage.draw();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\views\PlayerView.java ===
+package com.github.den666bah666.views;
+
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.github.den666bah666.models.Player;
+
+public class PlayerView {
+    private Texture texture;
+
+    public PlayerView(Texture texture) {
+        this.texture = texture;
+    }
+
+    public void render(SpriteBatch batch, Player model) {
+        batch.draw(texture, model.getPosition().x, model.getPosition().y);
+    }
+}
+
+

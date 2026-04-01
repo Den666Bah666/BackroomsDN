@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.github.den666bah666.AssetManager;
+import com.github.den666bah666.Assets;
 import com.github.den666bah666.models.Player;
 import com.github.den666bah666.views.PlayerView;
 
@@ -79,7 +79,7 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         viewport = new ExtendViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         player = new Player(0, 0);
-        playerView = new PlayerView(AssetManager.get("player"));
+        playerView = new PlayerView(Assets.getTexture(Assets.PLAYER_TEXTURE));
     }
 
     @Override

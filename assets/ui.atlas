@@ -1,0 +1,9 @@
+ui.png
+size:32,16
+repeat:none
+button_bg
+bounds:12,2,8,8
+button_frame
+bounds:2,2,8,8
+split:1,1,1,1
+pad:1,1,1,1
