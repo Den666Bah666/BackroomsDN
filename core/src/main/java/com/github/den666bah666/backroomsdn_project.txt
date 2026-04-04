@@ -45,6 +45,7 @@ package com.github.den666bah666.drawables;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.utils.BaseDrawable;
 
 public class TiledButtonDrawable extends BaseDrawable {
@@ -61,8 +62,10 @@ public class TiledButtonDrawable extends BaseDrawable {
 
         for (float y_ = y; y_ < y + height; y_ += tileH) {
             for (float x_ = x; x_ < x + width; x_ += tileW) {
-                batch.draw(bgRegion, x_, y_,
-                    Math.min(tileW, x + width - x_), Math.min(tileH, y + height - y_));
+                batch.draw(bgRegion.getTexture(), x_, y_, bgRegion.getRegionX(), bgRegion.getRegionY(),
+                    Math.min(tileW, MathUtils.floor(x + width - x_)),
+                    Math.min(tileH, MathUtils.floor(y + height - y_))
+                );
             }
         }
     }
@@ -83,6 +86,11 @@ public class TiledNinePatchDrawable extends TiledButtonDrawable {
     public TiledNinePatchDrawable(NinePatch patch, TextureRegion bgRegion) {
         super(bgRegion);
         patchDrawable = new NinePatchDrawable(patch);
+
+        patchDrawable.getPatch().getTexture().setFilter(
+            com.badlogic.gdx.graphics.Texture.TextureFilter.Nearest,
+            com.badlogic.gdx.graphics.Texture.TextureFilter.Nearest
+        );
     }
 
     @Override
@@ -299,55 +307,86 @@ public class GameScreen implements Screen {
 === C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\screens\MenuScreen.java ===
 package com.github.den666bah666.screens;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.github.den666bah666.Assets;
-import com.github.den666bah666.drawables.TiledButtonDrawable;
+import com.github.den666bah666.Settings;
 import com.github.den666bah666.drawables.TiledNinePatchDrawable;
 
 public class MenuScreen implements Screen {
-    private Viewport viewport;
-    private Camera camera;
     private SpriteBatch batch;
     private Stage stage;
 
     public MenuScreen(SpriteBatch batch) {
         this.batch = batch;
-        stage = new Stage(new ScreenViewport());
+        stage = new Stage(new FitViewport(
+            Gdx.graphics.getWidth() / (float) Settings.GUI_SCALE,
+            Gdx.graphics.getHeight() / (float) Settings.GUI_SCALE)
+        );
 
         TextureAtlas atlas = Assets.getAtlas(Assets.UI_ATLAS);
 
-        Gdx.input.setInputProcessor(stage);
+        InputMultiplexer multiplexer = new InputMultiplexer(stage);
+        multiplexer.addProcessor(new InputAdapter() {
+            @Override
+            public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.F11) {
+                    if (Gdx.graphics.isFullscreen()) {
+                        Gdx.graphics.setWindowedMode(1280, 720);
+                    } else {
+                        Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        Gdx.input.setInputProcessor(multiplexer);
 
-        BitmapFont font = new BitmapFont();
+        BitmapFont font = new BitmapFont(Gdx.files.internal("fonts/minecraft.fnt"));
         font.setColor(Color.WHITE);
-        font.getData().setScale(1.5f);
+        font.getData().setScale(1f);
 
         TiledNinePatchDrawable tiledNinePatchDrawable = new TiledNinePatchDrawable(
-            atlas.createPatch("button_frame"), atlas.findRegion("button_frame")
+            atlas.createPatch("button_frame"), atlas.findRegion("button_bg")
+        );
+
+        TiledNinePatchDrawable tiledNinePatchDrawable2 = new TiledNinePatchDrawable(
+            atlas.createPatch("button_frame_hover"), atlas.findRegion("button_bg")
         );
 
         // Generic style
         TextButton.TextButtonStyle genericStyle = new TextButton.TextButtonStyle();
         genericStyle.fontColor = Color.WHITE;
         genericStyle.up = tiledNinePatchDrawable;
+        genericStyle.over = tiledNinePatchDrawable2;
         genericStyle.font = font;
 
+        Table table = new Table();
+        table.setFillParent(true);
+        table.padTop(192f / Settings.GUI_SCALE).top();
+
         // Menu button
-        TextButton menuButton = new TextButton("Menu", genericStyle);
-        stage.addActor(menuButton);
+        TextButton menuButton = new TextButton("Play", genericStyle);
+        table.add(menuButton).width(200).height(20).align(Align.center)
+             .padTop(8f / Settings.GUI_SCALE).row();
+        table.pack();
+
+        // Settings button
+        TextButton settingsButton = new TextButton("Settings", genericStyle);
+        table.add(settingsButton).width(200).height(20).align(Align.center)
+             .padTop(8f / Settings.GUI_SCALE).row();
+        table.pack();
+
+        stage.addActor(table);
     }
 
     @Override
@@ -363,7 +402,7 @@ public class MenuScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height, true);
+        stage.getViewport().update(width, height);
     }
 
     @Override
@@ -384,6 +423,34 @@ public class MenuScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+    }
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\Settings.java ===
+package com.github.den666bah666;
+
+public class Settings {
+    public static int GUI_SCALE = 3;
+}
+
+
+=== C:\coddy\javaProjects\BackroomsDN\core\src\main\java\com\github\den666bah666\ShadowLabel.java ===
+package com.github.den666bah666;
+
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Align;
+
+public class ShadowLabel extends Label {
+    public ShadowLabel(String text, LabelStyle style) {
+        super(text, style);
+        setAlignment(Align.center);
+    }
+
+    @Override
+    public void draw(Batch batch, float parentAlpha) {
+
     }
 }
 

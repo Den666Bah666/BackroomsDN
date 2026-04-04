@@ -15,8 +15,8 @@ maxHeight=2048
 maxWidth=2048
 minHeight=16
 minWidth=16
-paddingX=2
-paddingY=2
+paddingX=0
+paddingY=0
 pot=true
 mof=false
 rotation=false
@@ -34,7 +34,7 @@ prettyPrint=false
 legacyOutput=false
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
-inputFiles=[{path:button_bg.png,type:Input,regionName:null},{path:button_frame.png,type:Input,regionName:"",ninepatch:{splits:[1,1,1,1],pads:[1,1,1,1]}}]
+inputFiles=[{path:button.png,type:Input,regionName:null,ninepatch:{splits:[3,3,3,3],pads:[3,3,3,3]}},{path:button_disabled.png,type:Input,regionName:null,ninepatch:{splits:[3,3,3,3],pads:[3,3,3,3]}},{path:button_highlighted.png,type:Input,regionName:null,ninepatch:{splits:[3,3,3,3],pads:[3,3,3,3]}}]
 keepInputFileExtensions=false
 
 
