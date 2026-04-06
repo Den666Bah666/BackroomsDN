@@ -3,29 +3,25 @@ package com.github.den666bah666.screens;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.github.den666bah666.Assets;
 import com.github.den666bah666.Settings;
 import com.github.den666bah666.drawables.MinecraftButtonDrawable;
-import com.github.den666bah666.drawables.TiledNinePatchDrawable;
 
 public class MenuScreen implements Screen {
-    private SpriteBatch batch;
-    private Stage stage = new Stage(new FillViewport(
-        (float) (Gdx.graphics.getWidth() / Settings.GUI_SCALE),
-        (float) (Gdx.graphics.getHeight() / Settings.GUI_SCALE))
-    );
+    private Stage stage = new Stage(new ScreenViewport());
+    {
+        ((ScreenViewport) stage.getViewport()).setUnitsPerPixel(1f / Settings.GUI_SCALE);
+        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+    }
 
-    public MenuScreen(SpriteBatch batch) {
-        this.batch = batch;
-
+    public MenuScreen() {
         TextureAtlas atlas = Assets.getAtlas(Assets.UI_ATLAS);
 
         InputMultiplexer multiplexer = new InputMultiplexer(stage);
@@ -58,7 +54,6 @@ public class MenuScreen implements Screen {
         genericStyle.font = font;
 
         Table table = new Table();
-        table.setFillParent(true);
         table.padTop(192f / Settings.GUI_SCALE).top();
 
         // Menu button
