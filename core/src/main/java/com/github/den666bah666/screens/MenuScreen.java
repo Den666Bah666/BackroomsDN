@@ -52,9 +52,8 @@ public class MenuScreen implements Screen {
         // Generic style
         TextButton.TextButtonStyle genericStyle = new TextButton.TextButtonStyle();
         genericStyle.fontColor = Color.WHITE;
-        genericStyle.up = new TiledNinePatchDrawable(atlas.createPatch("button"), atlas.findRegion("button"));
         genericStyle.up = new MinecraftButtonDrawable(atlas.createPatch("button"), atlas.findRegion("button"));
-        genericStyle.over = new TiledNinePatchDrawable(
+        genericStyle.over = new MinecraftButtonDrawable(
             atlas.createPatch("button_highlighted"), atlas.findRegion("button_highlighted"));
         genericStyle.font = font;
 
@@ -64,7 +63,7 @@ public class MenuScreen implements Screen {
 
         // Menu button
         TextButton menuButton = new TextButton("Play", genericStyle);
-        table.add(menuButton).width(61).height(20).align(Align.center)
+        table.add(menuButton).size(61, 21).align(Align.center)
              .padTop(8f / Settings.GUI_SCALE).row();
         table.pack();
 
