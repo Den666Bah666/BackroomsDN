@@ -3,11 +3,13 @@ package com.github.den666bah666.screens;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.github.den666bah666.Assets;
@@ -15,13 +17,15 @@ import com.github.den666bah666.Settings;
 import com.github.den666bah666.drawables.MinecraftButtonDrawable;
 
 public class MenuScreen implements Screen {
+    private final Game game;
     private Stage stage = new Stage(new ScreenViewport());
     {
         ((ScreenViewport) stage.getViewport()).setUnitsPerPixel(1f / Settings.GUI_SCALE);
         stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
     }
 
-    public MenuScreen() {
+    public MenuScreen(Game game) {
+        this.game = game;
         TextureAtlas atlas = Assets.getAtlas(Assets.UI_ATLAS);
 
         InputMultiplexer multiplexer = new InputMultiplexer(stage);
@@ -48,25 +52,39 @@ public class MenuScreen implements Screen {
         // Generic style
         TextButton.TextButtonStyle genericStyle = new TextButton.TextButtonStyle();
         genericStyle.fontColor = Color.WHITE;
-        genericStyle.up = new MinecraftButtonDrawable(atlas.createPatch("button"), atlas.findRegion("button"));
-        genericStyle.over = new MinecraftButtonDrawable(
-            atlas.createPatch("button_highlighted"), atlas.findRegion("button_highlighted"));
+        genericStyle.up = new MinecraftButtonDrawable(atlas.createPatch("button"),
+            atlas.findRegion("button"));
+        genericStyle.over = new MinecraftButtonDrawable(atlas.createPatch("button_highlighted"),
+            atlas.findRegion("button_highlighted"));
         genericStyle.font = font;
 
         Table table = new Table();
-        table.padTop(192f / Settings.GUI_SCALE).top();
+        table.setFillParent(true);
+        table.center();
 
         // Menu button
         TextButton menuButton = new TextButton("Play", genericStyle);
-        table.add(menuButton).size(61, 21).align(Align.center)
-             .padTop(8f / Settings.GUI_SCALE).row();
-        table.pack();
+        table.add(menuButton).size(200, 20).padTop(9f / Settings.GUI_SCALE).row();
+        menuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new GameScreen(new SpriteBatch()));
+            }
+        });
 
         // Settings button
         TextButton settingsButton = new TextButton("Settings", genericStyle);
-        table.add(settingsButton).width(200).height(20).align(Align.center)
-             .padTop(8f / Settings.GUI_SCALE).row();
-        table.pack();
+        table.add(settingsButton).size(200, 20).padTop(9f / Settings.GUI_SCALE).row();
+
+        // Exit button
+        TextButton exitButton = new TextButton("Exit", genericStyle);
+        table.add(exitButton).size(200, 20).padTop(9f / Settings.GUI_SCALE).row();
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
 
         stage.addActor(table);
     }
@@ -78,14 +96,14 @@ public class MenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(Color.RED);
+        ScreenUtils.clear(Color.WHITE);
         stage.act(delta);
         stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-        stage.getViewport().update(width, height);
+        stage.getViewport().update(width, height, true);
     }
 
     @Override

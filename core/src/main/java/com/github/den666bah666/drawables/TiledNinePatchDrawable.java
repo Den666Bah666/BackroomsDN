@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.github.den666bah666.Settings;
 
+@Deprecated(since = "MinecraftButtonDrawable is better, lol", forRemoval = true)
 public class TiledNinePatchDrawable extends NinePatchDrawable {
     private final TiledDrawable drawable;
     private final float left, right, top, bottom;
