@@ -35,7 +35,7 @@ public class Main extends Game {
     private void switchState(int state) {
         switch (state) {
             case MENU_STATE -> setScreen(new MenuScreen(this));
-            case GAME_STATE -> setScreen(new GameScreen(batch));
+            case GAME_STATE -> setScreen(new GameScreen(this));
         }
     }
 }

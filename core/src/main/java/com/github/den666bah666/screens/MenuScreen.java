@@ -18,14 +18,15 @@ import com.github.den666bah666.drawables.MinecraftButtonDrawable;
 
 public class MenuScreen implements Screen {
     private final Game game;
-    private Stage stage = new Stage(new ScreenViewport());
-    {
-        ((ScreenViewport) stage.getViewport()).setUnitsPerPixel(1f / Settings.GUI_SCALE);
-        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-    }
+    private final Stage stage;
 
     public MenuScreen(Game game) {
         this.game = game;
+
+        stage = new Stage(new ScreenViewport());
+        ((ScreenViewport) stage.getViewport()).setUnitsPerPixel(1f / Settings.GUI_SCALE);
+        stage.getViewport().update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+
         TextureAtlas atlas = Assets.getAtlas(Assets.UI_ATLAS);
 
         InputMultiplexer multiplexer = new InputMultiplexer(stage);
@@ -68,7 +69,7 @@ public class MenuScreen implements Screen {
         menuButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScreen(new SpriteBatch()));
+                game.setScreen(new GameScreen(game));
             }
         });
 
